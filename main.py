@@ -122,7 +122,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(APP_NAME)
-        self.resize(1120, 760)
+        self.resize(1280, 820)
+        self.setMinimumSize(900, 620)
         self.settings = QSettings("NVIDIA", "AI Studio")
         self.current_chat = None
         self.messages = []
@@ -184,7 +185,7 @@ class MainWindow(QMainWindow):
         self.transcript.setObjectName("transcript")
         ml.addWidget(self.transcript, 1)
 
-        self.status = QLabel("Готово")
+        self.status = QLabel("●  СИСТЕМА ГОТОВА  •  NVIDIA NIM")
         self.status.setObjectName("muted")
         ml.addWidget(self.status)
         composer = QHBoxLayout()
@@ -213,20 +214,40 @@ class MainWindow(QMainWindow):
 
     def _apply_style(self):
         self.setStyleSheet("""
-            QWidget { background:#111318; color:#e8eaf0; font-family:'Segoe UI'; font-size:10pt; }
-            #sidebar { background:#171a21; border-right:1px solid #292e39; }
-            #brand { color:#76b900; font-size:16pt; font-weight:700; padding:12px 4px 18px; }
-            #pageTitle { font-size:19pt; font-weight:600; }
-            #muted { color:#8d95a5; }
-            QTextEdit, QLineEdit, QComboBox, QListWidget { background:#1b1f28; border:1px solid #303644; border-radius:9px; padding:10px; selection-background-color:#76b900; }
-            #transcript { padding:18px; font-size:11pt; }
-            QPushButton { background:#252b35; border:1px solid #394150; border-radius:9px; padding:11px 14px; }
-            QPushButton:hover { background:#303846; border-color:#76b900; }
-            QPushButton:disabled { color:#727987; background:#20242c; }
-            QComboBox { padding:8px; }
-            QListWidget { border:0; background:transparent; padding:4px; }
-            QListWidget::item { padding:11px; border-radius:7px; }
-            QListWidget::item:selected { background:#293522; color:#a8dc55; }
+            * { font-family: 'Segoe UI'; }
+            QWidget { background:#080d0a; color:#d8f5df; font-size:10pt; }
+            QMainWindow { background:#080d0a; }
+            #sidebar { background:#0b120e; border-right:1px solid #183b27; }
+            #brand { color:#39ff78; font-size:17pt; font-weight:800; padding:14px 5px 22px; }
+            #pageTitle { color:#eaffef; font-size:21pt; font-weight:700; }
+            #muted { color:#78a889; }
+            QTextEdit, QLineEdit, QComboBox, QListWidget {
+                background:#0e1912; color:#d8f5df; border:1px solid #1c4930;
+                border-radius:10px; padding:11px; selection-background-color:#20b85a;
+                selection-color:#041008;
+            }
+            QTextEdit:focus, QLineEdit:focus, QComboBox:focus { border:1px solid #39ff78; }
+            #transcript { background:#090f0b; border:1px solid #1b3b28; padding:20px; font-size:11pt; }
+            QPushButton {
+                background:#102419; color:#c9f8d5; border:1px solid #23663d;
+                border-radius:10px; padding:11px 15px; font-weight:600;
+            }
+            QPushButton:hover { background:#173b25; border-color:#39ff78; color:#ffffff; }
+            QPushButton:pressed { background:#205332; }
+            QPushButton:disabled { color:#52705c; background:#101a13; border-color:#203829; }
+            QListWidget { border:0; background:transparent; padding:5px; }
+            QListWidget::item { padding:12px; margin:2px 0; border-radius:8px; color:#a9cbb3; }
+            QListWidget::item:hover { background:#11291a; color:#eaffef; }
+            QListWidget::item:selected { background:#153b22; color:#5cff91; border:1px solid #276b3d; }
+            QComboBox QAbstractItemView { background:#0e1912; color:#d8f5df; selection-background-color:#205332; }
+            QScrollBar:vertical { background:#0a120d; width:10px; margin:0; }
+            QScrollBar::handle:vertical { background:#245b37; min-height:24px; border-radius:5px; }
+            QScrollBar::handle:vertical:hover { background:#39a85e; }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height:0; }
+            QCheckBox { color:#a9cbb3; spacing:8px; }
+            QCheckBox::indicator { width:16px; height:16px; }
+            QCheckBox::indicator:checked { background:#39ff78; border:1px solid #39ff78; }
+            QCheckBox::indicator:unchecked { background:#0e1912; border:1px solid #2b6840; }
         """)
 
     def _load_chats(self):
@@ -295,8 +316,9 @@ class MainWindow(QMainWindow):
             self.status.setText("Добавьте NVIDIA API key в настройках")
             return
         self.status.setText("Загружаю модели…")
-        self._start_worker(ApiWorker("models", key))
-        self.worker.models_ready.connect(self._models_loaded)
+        worker = ApiWorker("models", key)
+        worker.models_ready.connect(self._models_loaded)
+        self._start_worker(worker)
 
     def _models_loaded(self, models):
         current = self.model_box.currentText()
